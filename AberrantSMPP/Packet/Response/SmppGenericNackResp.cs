@@ -16,45 +16,44 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections;
-using AberrantSMPP.Packet;
 
-namespace AberrantSMPP.Packet.Response
+namespace Aberrant.SMPP.Core.Packet.Response
 {
-	/// <summary>
-	/// Represents a generic NACK sent by the SMSC.
-	/// </summary>
-	public class SmppGenericNackResp : SmppResponse
-	{
-		protected override CommandId DefaultCommandId { get { return CommandId.generic_nack; } }
+    /// <summary>
+    /// Represents a generic NACK sent by the SMSC.
+    /// </summary>
+    public class SmppGenericNackResp : SmppResponse
+    {
+        protected override CommandId DefaultCommandId => CommandId.generic_nack;
 
-		#region constructors
-		
-		/// <summary>
-		/// Creates a generic_nack response Pdu.
-		/// </summary>
-		/// <param name="incomingBytes">The bytes received from an ESME.</param>
-		public SmppGenericNackResp(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		/// <summary>
-		/// Creates a generic_nack response Pdu.
-		/// </summary>
-		public SmppGenericNackResp(): base()
-		{}
-		
-		#endregion constructors
-		
-		/// <summary>
-		/// Decodes the generic NACK response from the SMSC.  Since a generic
-		/// NACK response contains essentially nothing other than the header,
-		/// this method does nothing special.  It will grab any TLVs that are in
-		/// the Pdu, however.
-		/// </summary>
-		protected override void DecodeSmscResponse()
-		{
-			TranslateTlvDataIntoTable(BytesAfterHeader);
-		}
-	}
+        #region constructors
+
+        /// <summary>
+        /// Creates a generic_nack response Pdu.
+        /// </summary>
+        /// <param name="incomingBytes">The bytes received from an ESME.</param>
+        public SmppGenericNackResp(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        /// <summary>
+        /// Creates a generic_nack response Pdu.
+        /// </summary>
+        public SmppGenericNackResp() : base()
+        {
+        }
+
+        #endregion constructors
+
+        /// <summary>
+        /// Decodes the generic NACK response from the SMSC.  Since a generic
+        /// NACK response contains essentially nothing other than the header,
+        /// this method does nothing special.  It will grab any TLVs that are in
+        /// the Pdu, however.
+        /// </summary>
+        protected override void DecodeSmscResponse()
+        {
+            TranslateTlvDataIntoTable(BytesAfterHeader);
+        }
+    }
 }

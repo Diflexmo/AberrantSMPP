@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections;
-using System.Text;
+﻿using System.Collections;
 
-namespace AberrantSMPP.Packet.Request
+namespace Aberrant.SMPP.Core.Packet.Request
 {
-	public abstract class SmppRequest : Pdu
-	{
-		#region constructors
-		
-		/// <summary>
-		/// Groups construction tasks for subclasses.  Sets source address TON to 
-		/// international, source address NPI to ISDN, and source address to "".
-		/// </summary>
-		protected SmppRequest(): base()
-		{}
-		
-		/// <summary>
-		/// Creates a new MessageLcd6 for incoming PDUs.
-		/// </summary>
-		/// <param name="incomingBytes">The incoming bytes to decode.</param>
-		protected SmppRequest(byte[] incomingBytes) : base(incomingBytes)
-		{}
-		#endregion constructors
+    public abstract class SmppRequest : Pdu
+    {
+        #region constructors
 
-		protected override void AppendPduData(ArrayList pdu)
-		{
-			// Do nothing..
-		}
-	}
+        /// <summary>
+        /// Groups construction tasks for subclasses.  Sets source address TON to 
+        /// international, source address NPI to ISDN, and source address to "".
+        /// </summary>
+        protected SmppRequest() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new MessageLcd6 for incoming PDUs.
+        /// </summary>
+        /// <param name="incomingBytes">The incoming bytes to decode.</param>
+        protected SmppRequest(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+
+        protected override void AppendPduData(ArrayList pdu)
+        {
+            // Do nothing..
+        }
+    }
 }

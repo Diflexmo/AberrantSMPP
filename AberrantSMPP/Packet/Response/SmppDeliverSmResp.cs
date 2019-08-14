@@ -16,51 +16,52 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
+
 using System.Collections;
-using AberrantSMPP.Packet;
 
-namespace AberrantSMPP.Packet.Response
+namespace Aberrant.SMPP.Core.Packet.Response
 {
-	/// <summary>
-	/// This class defines an ESME originated deliver_sm_resp.
-	/// </summary>
-	public class SmppDeliverSmResp : SmppResponse
-	{
-		protected override CommandId DefaultCommandId { get { return CommandId.deliver_sm_resp; } }
+    /// <summary>
+    /// This class defines an ESME originated deliver_sm_resp.
+    /// </summary>
+    public class SmppDeliverSmResp : SmppResponse
+    {
+        protected override CommandId DefaultCommandId => CommandId.deliver_sm_resp;
 
-		#region constructors
-		
-		/// <summary>
-		/// Creates a deliver_sm_resp Pdu.  Sets command status and command ID.
-		/// </summary>
-		public SmppDeliverSmResp(): base()
-		{}
-		
-		/// <summary>
-		/// Creates a deliver_sm_resp Pdu.  Sets command status and command ID.
-		/// </summary>
-		/// <param name="incomingBytes">The incoming bytes from the ESME.</param>
-		public SmppDeliverSmResp(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		#endregion constructors
-		
-		protected override void AppendPduData(ArrayList pdu)
-		{
-			//the message_id is unused and is always set to null
-			pdu.Add((byte)0x00);
-		}
-		
-		/// <summary>
-		/// Decodes the deliver_sm response from the SMSC.
-		/// </summary>
-		protected override void DecodeSmscResponse()
-		{
-			byte[] remainder = BytesAfterHeader;
+        #region constructors
 
-			//fill the TLV table if applicable
-			TranslateTlvDataIntoTable(remainder, 1);
-		}
-	}
+        /// <summary>
+        /// Creates a deliver_sm_resp Pdu.  Sets command status and command ID.
+        /// </summary>
+        public SmppDeliverSmResp() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a deliver_sm_resp Pdu.  Sets command status and command ID.
+        /// </summary>
+        /// <param name="incomingBytes">The incoming bytes from the ESME.</param>
+        public SmppDeliverSmResp(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+
+        protected override void AppendPduData(ArrayList pdu)
+        {
+            //the message_id is unused and is always set to null
+            pdu.Add((byte) 0x00);
+        }
+
+        /// <summary>
+        /// Decodes the deliver_sm response from the SMSC.
+        /// </summary>
+        protected override void DecodeSmscResponse()
+        {
+            byte[] remainder = BytesAfterHeader;
+
+            //fill the TLV table if applicable
+            TranslateTlvDataIntoTable(remainder, 1);
+        }
+    }
 }

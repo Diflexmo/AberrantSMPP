@@ -17,40 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Response;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-using AberrantSMPP.Packet.Response;
-
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a cancel_sm_resp event.
-	/// </summary>
-	public class CancelSmRespEventArgs : SmppEventArgs 
-	{
-		private SmppCancelSmResp _response;
+    /// <summary>
+    /// Class that defines a cancel_sm_resp event.
+    /// </summary>
+    public class CancelSmRespEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppCancelSmResp CancelSmRespPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppCancelSmResp CancelSmRespPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a CancelSmRespEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal CancelSmRespEventArgs(SmppCancelSmResp packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a CancelSmRespEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal CancelSmRespEventArgs(SmppCancelSmResp packet) : base(packet)
+        {
+            CancelSmRespPdu = packet;
+        }
+    }
 }

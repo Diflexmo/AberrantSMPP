@@ -16,44 +16,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using AberrantSMPP.Utility;
-using System.Collections;
 
-namespace AberrantSMPP.Packet.Request
+namespace Aberrant.SMPP.Core.Packet.Request
 {
-	/// <summary>
-	/// Class to represent a generic negative acknowledgment.
-	/// </summary>
-	public class SmppGenericNack : SmppRequest
-	{		
-		protected override CommandId DefaultCommandId { get { return CommandId.generic_nack; } }
+    /// <summary>
+    /// Class to represent a generic negative acknowledgment.
+    /// </summary>
+    public class SmppGenericNack : SmppRequest
+    {
+        protected override CommandId DefaultCommandId => CommandId.generic_nack;
 
-		#region constructors
-		
-		/// <summary>
-		/// Creates a new generic NACK.  Sets the error code to 0.
-		/// </summary>
-		public SmppGenericNack(): base()
-		{}
-		
-		/// <summary>
-		/// Creates a new generic NACK.
-		/// </summary>
-		/// <param name="incomingBytes">The incoming bytes from the ESME.</param>
-		public SmppGenericNack(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		#endregion constructors
-				
-		/// <summary>
-		/// This decodes the query_sm Pdu.
-		/// </summary>
-		protected override void DecodeSmscResponse()
-		{
-			byte[] remainder = BytesAfterHeader;
-			
-			TranslateTlvDataIntoTable(remainder);
-		}
-	}
+        #region constructors
+
+        /// <summary>
+        /// Creates a new generic NACK.  Sets the error code to 0.
+        /// </summary>
+        public SmppGenericNack() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new generic NACK.
+        /// </summary>
+        /// <param name="incomingBytes">The incoming bytes from the ESME.</param>
+        public SmppGenericNack(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+
+        /// <summary>
+        /// This decodes the query_sm Pdu.
+        /// </summary>
+        protected override void DecodeSmscResponse()
+        {
+            byte[] remainder = BytesAfterHeader;
+
+            TranslateTlvDataIntoTable(remainder);
+        }
+    }
 }

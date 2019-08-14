@@ -17,39 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Request;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines the enquire_link event.
-	/// </summary>
-	public class EnquireLinkEventArgs : SmppEventArgs 
-	{
-		private SmppEnquireLink _response;
+    /// <summary>
+    /// Class that defines the enquire_link event.
+    /// </summary>
+    public class EnquireLinkEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppEnquireLink EnquireLinkPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppEnquireLink EnquireLinkPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-
-		/// <summary>
-		/// Sets up the EnquireLinkEventArgs.
-		/// </summary>
-		/// <param name="response">The PDU from the ESME.</param>
-		internal EnquireLinkEventArgs(SmppEnquireLink response): base(response)
-		{
-			_response = response;
-		}
-	}
+        /// <summary>
+        /// Sets up the EnquireLinkEventArgs.
+        /// </summary>
+        /// <param name="response">The PDU from the ESME.</param>
+        internal EnquireLinkEventArgs(SmppEnquireLink response) : base(response)
+        {
+            EnquireLinkPdu = response;
+        }
+    }
 }

@@ -17,40 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Aberrant.SMPP.Core.Packet.Request;
 
-using System;
-using AberrantSMPP.Packet.Response;
-using AberrantSMPP.Packet.Request;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
+    /// <summary>
+    /// Class that defines the unbind event.
+    /// </summary>
+    public class UnbindEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppUnbind UnbindPdu { get; }
 
-	/// <summary>
-	/// Class that defines the unbind event.
-	/// </summary>
-	public class UnbindEventArgs : SmppEventArgs 
-	{
-		SmppUnbind _response;
-
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppUnbind UnbindPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-
-		/// <summary>
-		/// Sets up the UnbindEventArgs.
-		/// </summary>
-		/// <param name="response">The SmppUnbind.</param>
-		internal UnbindEventArgs(SmppUnbind response): base(response)
-		{
-			_response = response;
-		}
-	}
+        /// <summary>
+        /// Sets up the UnbindEventArgs.
+        /// </summary>
+        /// <param name="response">The SmppUnbind.</param>
+        internal UnbindEventArgs(SmppUnbind response) : base(response)
+        {
+            UnbindPdu = response;
+        }
+    }
 }
-

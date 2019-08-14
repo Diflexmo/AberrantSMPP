@@ -17,38 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Aberrant.SMPP.Core.Packet.Response;
 
-using System;
-using AberrantSMPP.Packet.Response;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
+    /// <summary>
+    /// Class that defines a cancel_sm_resp event.
+    /// </summary>
+    public class CancelEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppCancelSmResp CancelPdu { get; }
 
-	/// <summary>
-	/// Class that defines a cancel_sm_resp event.
-	/// </summary>
-	public class CancelEventArgs : SmppEventArgs 
-	{
-		private SmppCancelSmResp _response;
-
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppCancelSmResp CancelPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-
-		/// <summary>
-		/// Sets up the CancelEventArgs.
-		/// </summary>
-		/// <param name="response">The SmppCancelSmResp.</param>
-		internal CancelEventArgs(SmppCancelSmResp response): base(response)
-		{
-			_response = response;
-		}
-	}
+        /// <summary>
+        /// Sets up the CancelEventArgs.
+        /// </summary>
+        /// <param name="response">The SmppCancelSmResp.</param>
+        internal CancelEventArgs(SmppCancelSmResp response) : base(response)
+        {
+            CancelPdu = response;
+        }
+    }
 }

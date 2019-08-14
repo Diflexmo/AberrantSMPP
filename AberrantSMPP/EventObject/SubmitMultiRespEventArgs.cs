@@ -17,40 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Response;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-using AberrantSMPP.Packet.Response;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a submit_multi_resp event.
-	/// </summary>
-	public class SubmitMultiRespEventArgs : SmppEventArgs 
-	{
-		private SmppSubmitMultiResp _response;
+    /// <summary>
+    /// Class that defines a submit_multi_resp event.
+    /// </summary>
+    public class SubmitMultiRespEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppSubmitMultiResp SubmitMultiRespPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppSubmitMultiResp SubmitMultiRespPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a SubmitMultiRespEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal SubmitMultiRespEventArgs(SmppSubmitMultiResp packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a SubmitMultiRespEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal SubmitMultiRespEventArgs(SmppSubmitMultiResp packet) : base(packet)
+        {
+            SubmitMultiRespPdu = packet;
+        }
+    }
 }

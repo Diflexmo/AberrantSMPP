@@ -17,24 +17,22 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Aberrant.SMPP.Core.Packet.Request;
 
-using System;
-using AberrantSMPP.Packet.Request;
-
-namespace AberrantSMPP.EventObjects
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines the bind_sm event.
-	/// </summary>
-	public class BindEventArgs : SmppEventArgs<SmppBind>
-	{
-		/// <summary>
-		/// Sets up the BindEventArgs.
-		/// </summary>
-		/// <param name="response">The SmppBindResp.</param>
-		internal BindEventArgs(SmppBind response)
-			: base(response)
-		{
-		}
-	}
+    /// <summary>
+    /// Class that defines the bind_sm event.
+    /// </summary>
+    public class BindEventArgs : SmppEventArgs<SmppBind>
+    {
+        /// <summary>
+        /// Sets up the BindEventArgs.
+        /// </summary>
+        /// <param name="response">The SmppBindResp.</param>
+        internal BindEventArgs(SmppBind response)
+            : base(response)
+        {
+        }
+    }
 }

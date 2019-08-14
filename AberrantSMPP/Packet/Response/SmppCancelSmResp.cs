@@ -16,42 +16,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections;
-using AberrantSMPP.Packet;
-	
-namespace AberrantSMPP.Packet.Response
-{	
-	/// <summary>
-	/// Response Pdu for the cancel_sm command.
-	/// </summary>
-	public class SmppCancelSmResp : SmppResponse
-	{
-		protected override CommandId DefaultCommandId { get { return CommandId.cancel_sm_resp; } }
 
-		#region constructors
-		
-		/// <summary>
-		/// Creates a cancel_sm Pdu.
-		/// </summary>
-		/// <param name="incomingBytes">The bytes received from an ESME.</param>
-		public SmppCancelSmResp(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		/// <summary>
-		/// Creates a cancel_sm Pdu.
-		/// </summary>
-		public SmppCancelSmResp(): base()
-		{}
-		
-		#endregion constructors
-		
-		/// <summary>
-		/// Decodes the cancel_sm response from the SMSC.
-		/// </summary>
-		protected override void DecodeSmscResponse()
-		{
-			TranslateTlvDataIntoTable(BytesAfterHeader);
-		}		
-	}
+namespace Aberrant.SMPP.Core.Packet.Response
+{
+    /// <summary>
+    /// Response Pdu for the cancel_sm command.
+    /// </summary>
+    public class SmppCancelSmResp : SmppResponse
+    {
+        protected override CommandId DefaultCommandId => CommandId.cancel_sm_resp;
+
+        #region constructors
+
+        /// <summary>
+        /// Creates a cancel_sm Pdu.
+        /// </summary>
+        /// <param name="incomingBytes">The bytes received from an ESME.</param>
+        public SmppCancelSmResp(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        /// <summary>
+        /// Creates a cancel_sm Pdu.
+        /// </summary>
+        public SmppCancelSmResp() : base()
+        {
+        }
+
+        #endregion constructors
+
+        /// <summary>
+        /// Decodes the cancel_sm response from the SMSC.
+        /// </summary>
+        protected override void DecodeSmscResponse()
+        {
+            TranslateTlvDataIntoTable(BytesAfterHeader);
+        }
+    }
 }

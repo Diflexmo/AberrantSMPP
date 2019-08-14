@@ -16,109 +16,96 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
-using System.Collections;
-using System.Text;
-using AberrantSMPP.Utility;
-using AberrantSMPP.Packet;
 
-namespace AberrantSMPP.Packet.Response
+using Aberrant.SMPP.Core.Utility;
+
+namespace Aberrant.SMPP.Core.Packet.Response
 {
-	/// <summary>
-	/// Response Pdu for the data_sm command.
-	/// </summary>
-	public class SmppDataSmResp : SmppSubmitSmResp
-	{
+    /// <summary>
+    /// Response Pdu for the data_sm command.
+    /// </summary>
+    public class SmppDataSmResp : SmppSubmitSmResp
+    {
+        protected override CommandId DefaultCommandId => CommandId.data_sm_resp;
 
-		protected override CommandId DefaultCommandId { get { return CommandId.data_sm_resp; } }
+        #region optional parameters
 
-		#region optional parameters
-		
-		/// <summary>
-		/// Indicates the reason for delivery failure.
-		/// </summary>
-		public DeliveryFailureReason? DeliveryFailureReason
-		{
-			get
-			{
-				return GetOptionalParamByte<DeliveryFailureReason>(OptionalParamCodes.delivery_failure_reason);
-			}
-			
-			set
-			{
-				if (value.HasValue)
-				{
-					SetOptionalParamBytes(OptionalParamCodes.delivery_failure_reason,
-						BitConverter.GetBytes(UnsignedNumConverter.SwapByteOrdering((byte)value)));
-				}
-				else
-				{
-					SetOptionalParamBytes(OptionalParamCodes.delivery_failure_reason, null);
-				}
-			}
-		}
-		
-		/// <summary>
-		/// Error code specific to a wireless network.  See SMPP spec section
-		/// 5.3.2.31 for details.
-		/// </summary>
-		public byte[] NetworkErrorCode
-		{
-			get
-			{
-				return GetOptionalParamBytes(OptionalParamCodes.network_error_code);
-			}
-			
-			set
-			{
-				PduUtil.SetNetworkErrorCode(this, value);
-			}
-		}
-		
-		/// <summary>
-		/// Text(ASCII)giving additional info on the meaning of the response.
-		/// </summary>
-		public string AdditionalStatusInfoText
-		{
-			get
-			{
-				return GetOptionalParamString(OptionalParamCodes.additional_status_info_text);
-			}
-			
-			set
-			{
-				const int MAX_STATUS_LEN = 264;
+        /// <summary>
+        /// Indicates the reason for delivery failure.
+        /// </summary>
+        public DeliveryFailureReason? DeliveryFailureReason
+        {
+            get => GetOptionalParamByte<DeliveryFailureReason>(OptionalParamCodes.delivery_failure_reason);
 
-				if (value == null || value.Length <= MAX_STATUS_LEN)
-				{
-					SetOptionalParamString(OptionalParamCodes.additional_status_info_text, value, true);
-				}
-				else
-				{
-					throw new ArgumentException(
-						"additional_status_info_text must have length <= " + MAX_STATUS_LEN);
-				}
-			}
-		}
-				
-		#endregion optional parameters
-		
-		#region constructors
-		
-		/// <summary>
-		/// Creates a data_sm_resp Pdu.
-		/// </summary>
-		public SmppDataSmResp(): base()
-		{}
-		
-		/// <summary>
-		/// Creates a data_sm_resp Pdu.
-		/// </summary>
-		/// <param name="incomingBytes">The bytes received from an ESME.</param>
-		public SmppDataSmResp(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		#endregion constructors
-		
-	}
+            set
+            {
+                if (value.HasValue)
+                {
+                    SetOptionalParamBytes(OptionalParamCodes.delivery_failure_reason,
+                        BitConverter.GetBytes(UnsignedNumConverter.SwapByteOrdering((byte) value)));
+                }
+                else
+                {
+                    SetOptionalParamBytes(OptionalParamCodes.delivery_failure_reason, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Error code specific to a wireless network.  See SMPP spec section
+        /// 5.3.2.31 for details.
+        /// </summary>
+        public byte[] NetworkErrorCode
+        {
+            get => GetOptionalParamBytes(OptionalParamCodes.network_error_code);
+
+            set => PduUtil.SetNetworkErrorCode(this, value);
+        }
+
+        /// <summary>
+        /// Text(ASCII)giving additional info on the meaning of the response.
+        /// </summary>
+        public string AdditionalStatusInfoText
+        {
+            get => GetOptionalParamString(OptionalParamCodes.additional_status_info_text);
+
+            set
+            {
+                const int MAX_STATUS_LEN = 264;
+
+                if (value == null || value.Length <= MAX_STATUS_LEN)
+                {
+                    SetOptionalParamString(OptionalParamCodes.additional_status_info_text, value, true);
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        "additional_status_info_text must have length <= " + MAX_STATUS_LEN);
+                }
+            }
+        }
+
+        #endregion optional parameters
+
+        #region constructors
+
+        /// <summary>
+        /// Creates a data_sm_resp Pdu.
+        /// </summary>
+        public SmppDataSmResp() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a data_sm_resp Pdu.
+        /// </summary>
+        /// <param name="incomingBytes">The bytes received from an ESME.</param>
+        public SmppDataSmResp(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+    }
 }

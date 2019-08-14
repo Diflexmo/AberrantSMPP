@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <RootNamespace>Aberrant.SMPP.Core</RootNamespace>
+    <AssemblyName>Aberrant.SMPP.Core</AssemblyName>
+    <Authors>Diflexmo</Authors>
+    <Description>
+      Conversion of AberrantSMPP to netstandard2.2.
+
+      Source: https://github.com/pruiz/AberrantSMPP
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+</Project>

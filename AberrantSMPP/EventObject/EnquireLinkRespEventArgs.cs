@@ -17,37 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Aberrant.SMPP.Core.Packet.Response;
 
-using System;
-using AberrantSMPP.Packet.Response;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines the enquire_link_resp event.
-	/// </summary>
-	public class EnquireLinkRespEventArgs : SmppEventArgs 
-	{
-		private SmppEnquireLinkResp _response;
+    /// <summary>
+    /// Class that defines the enquire_link_resp event.
+    /// </summary>
+    public class EnquireLinkRespEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppEnquireLinkResp EnquireLinkRespPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppEnquireLinkResp EnquireLinkRespPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-
-		/// <summary>
-		/// Sets up the EnquireLinkEventArgs.
-		/// </summary>
-		/// <param name="response">The SmppEnquireLinkResp.</param>
-		internal EnquireLinkRespEventArgs(SmppEnquireLinkResp response): base(response)
-		{
-			_response = response;
-		}
-	}
+        /// <summary>
+        /// Sets up the EnquireLinkEventArgs.
+        /// </summary>
+        /// <param name="response">The SmppEnquireLinkResp.</param>
+        internal EnquireLinkRespEventArgs(SmppEnquireLinkResp response) : base(response)
+        {
+            EnquireLinkRespPdu = response;
+        }
+    }
 }

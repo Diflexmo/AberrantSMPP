@@ -17,49 +17,39 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Aberrant.SMPP.Core.Packet;
 
-using System;
-using AberrantSMPP.Packet;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Base class to provide some functionality for all events.
-	/// </summary>
-	public abstract class SmppEventArgs<T> : System.EventArgs 
-		where T : Pdu
-	{
-		private T _response;
+    /// <summary>
+    /// Base class to provide some functionality for all events.
+    /// </summary>
+    public abstract class SmppEventArgs<T> : System.EventArgs
+        where T : Pdu
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public T ResponsePdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public T ResponsePdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
+        /// <summary>
+        /// Sets up the SmppEventArgs.
+        /// </summary>
+        /// <param name="response">The SMPPResponse.</param>
+        public SmppEventArgs(T response)
+        {
+            ResponsePdu = response;
+        }
+    }
 
-		/// <summary>
-		/// Sets up the SmppEventArgs.
-		/// </summary>
-		/// <param name="response">The SMPPResponse.</param>
-		public SmppEventArgs(T response)
-		{
-			_response = response;
-		}
-	}
-
-	/// <summary>
-	/// Base class to provide some functionality for all events.
-	/// </summary>
-	public abstract class SmppEventArgs : SmppEventArgs<Pdu>
-	{
-		public SmppEventArgs(Pdu response)
-			: base(response)
-		{
-		}
-	}
+    /// <summary>
+    /// Base class to provide some functionality for all events.
+    /// </summary>
+    public abstract class SmppEventArgs : SmppEventArgs<Pdu>
+    {
+        public SmppEventArgs(Pdu response)
+            : base(response)
+        {
+        }
+    }
 }

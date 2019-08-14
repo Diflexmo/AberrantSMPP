@@ -17,40 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Response;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-using AberrantSMPP.Packet.Response;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a replace_sm_resp event.
-	/// </summary>
-	public class ReplaceSmRespEventArgs : SmppEventArgs 
-	{
-		private SmppReplaceSmResp _response;
+    /// <summary>
+    /// Class that defines a replace_sm_resp event.
+    /// </summary>
+    public class ReplaceSmRespEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppReplaceSmResp ReplaceSmRespPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppReplaceSmResp ReplaceSmRespPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a ReplaceSmRespEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal ReplaceSmRespEventArgs(SmppReplaceSmResp packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a ReplaceSmRespEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal ReplaceSmRespEventArgs(SmppReplaceSmResp packet) : base(packet)
+        {
+            ReplaceSmRespPdu = packet;
+        }
+    }
 }

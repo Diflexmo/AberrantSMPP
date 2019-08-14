@@ -16,58 +16,52 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using AberrantSMPP.Packet;
 
-namespace AberrantSMPP.Packet.Request
+namespace Aberrant.SMPP.Core.Packet.Request
 {
-	/// <summary>
-	/// Provides some common attributes for data_sm, submit_sm, submit_multi,
-	/// and replace_sm.
-	/// </summary>
-	public abstract class SmppRequest2 : SmppRequest1
-	{
-		/// <summary>
-		/// The registered delivery type of the message.
-		/// </summary>
-		protected RegisteredDeliveryType _RegisteredDelivery = Pdu.RegisteredDeliveryType.None;
-		
-		#region properties
-		
-		/// <summary>
-		/// The registered delivery type of the message.
-		/// </summary>
-		public RegisteredDeliveryType RegisteredDelivery
-		{
-			get
-			{
-				return _RegisteredDelivery;
-			}
-			set
-			{
-				_RegisteredDelivery =  value;
-			}
-		}
-		
-		#endregion properties
-		
-		#region constructors
-		
-		/// <summary>
-		/// Groups construction tasks for subclasses.  Sets source address TON to international, 
-		/// source address NPI to ISDN, source address to "", and registered delivery type to 
-		/// none.
-		/// </summary>
-		protected SmppRequest2(): base()
-		{}
-		
-		/// <summary>
-		/// Creates a new MessageLcd4 for incoming PDUs.
-		/// </summary>
-		/// <param name="incomingBytes">The incoming bytes to decode.</param>
-		protected SmppRequest2(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		#endregion constructors
-	}
+    /// <summary>
+    /// Provides some common attributes for data_sm, submit_sm, submit_multi,
+    /// and replace_sm.
+    /// </summary>
+    public abstract class SmppRequest2 : SmppRequest1
+    {
+        /// <summary>
+        /// The registered delivery type of the message.
+        /// </summary>
+        protected RegisteredDeliveryType _RegisteredDelivery = RegisteredDeliveryType.None;
+
+        #region properties
+
+        /// <summary>
+        /// The registered delivery type of the message.
+        /// </summary>
+        public RegisteredDeliveryType RegisteredDelivery
+        {
+            get => _RegisteredDelivery;
+            set => _RegisteredDelivery = value;
+        }
+
+        #endregion properties
+
+        #region constructors
+
+        /// <summary>
+        /// Groups construction tasks for subclasses.  Sets source address TON to international, 
+        /// source address NPI to ISDN, source address to "", and registered delivery type to 
+        /// none.
+        /// </summary>
+        protected SmppRequest2() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new MessageLcd4 for incoming PDUs.
+        /// </summary>
+        /// <param name="incomingBytes">The incoming bytes to decode.</param>
+        protected SmppRequest2(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+    }
 }

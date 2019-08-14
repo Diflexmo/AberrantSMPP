@@ -17,40 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Response;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-using AberrantSMPP.Packet.Response;
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a query_sm_resp event.
-	/// </summary>
-	public class QuerySmRespEventArgs : SmppEventArgs 
-	{
-		private SmppQuerySmResp _response;
+    /// <summary>
+    /// Class that defines a query_sm_resp event.
+    /// </summary>
+    public class QuerySmRespEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppQuerySmResp QuerySmRespPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppQuerySmResp QuerySmRespPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a QuerySmRespEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal QuerySmRespEventArgs(SmppQuerySmResp packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a QuerySmRespEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal QuerySmRespEventArgs(SmppQuerySmResp packet) : base(packet)
+        {
+            QuerySmRespPdu = packet;
+        }
+    }
 }

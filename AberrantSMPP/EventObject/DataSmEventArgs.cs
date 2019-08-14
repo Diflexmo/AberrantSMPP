@@ -17,39 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Request;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a data_sm event.  
-	/// </summary>
-	public class DataSmEventArgs : SmppEventArgs 
-	{
-		private SmppDataSm _response;
+    /// <summary>
+    /// Class that defines a data_sm event.  
+    /// </summary>
+    public class DataSmEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppDataSm DataSmPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppDataSm DataSmPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a DataSmEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal DataSmEventArgs(SmppDataSm packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a DataSmEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal DataSmEventArgs(SmppDataSm packet) : base(packet)
+        {
+            DataSmPdu = packet;
+        }
+    }
 }

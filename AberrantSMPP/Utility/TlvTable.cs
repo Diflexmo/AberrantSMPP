@@ -16,114 +16,112 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
 using System.Collections;
-using System.Net;
-using System.Text;
-using System.Diagnostics;
 
-namespace AberrantSMPP.Utility
+namespace Aberrant.SMPP.Core.Utility
 {
-	/// <summary>
-	/// Tag, length, value table for SMPP PDUs.  The methods in this class assume 
-	/// that the tag passed in is already in network byte order.
-	/// </summary>
-	public class TlvTable
-	{
-		private Hashtable tlvTable;
-		
-		/// <summary>
-		/// Creates a TLV table.
-		/// </summary>
-		public TlvTable()
-		{
-			tlvTable = new Hashtable();
-			tlvTable = Hashtable.Synchronized(tlvTable);
-		}
-		
-		/// <summary>
-		/// Converts the TLV byte array data into the Hashtable.  This will check if
-		/// the passed in data is null or is an empty array so you don't need to
-		/// check it before calling this method.  This is equivalent to
-		/// TranslateTlvDataIntoTable(tlvData, 0).
-		/// </summary>
-		/// <param name="tlvData">The bytes of TLVs.</param>
-		public void TranslateTlvDataIntoTable(byte[] tlvData)
-		{
-			TranslateTlvDataIntoTable(tlvData, 0);
-		}
-		
-		/// <summary>
-		/// Converts the TLV byte array data into the Hashtable.  This will check if
-		/// the passed in data is null or is an empty array so you don't need to check
-		/// it before calling this method.
-		/// </summary>
-		/// <param name="tlvData">The bytes of TLVs.</param>
-		/// <param name="index">The index of the byte array to start at.  This is here
-		/// because in some instances you may not want to start at the
-		/// beginning.</param>
-		public void TranslateTlvDataIntoTable(byte[] tlvData, Int32 index)
-		{
-			if(tlvData == null || tlvData.Length <= 0)
-			{
-				return;
-			}
-			
-			//go through and decode the TLVs
-			while(index < tlvData.Length)
-			{
-				InjectTlv(tlvData, ref index);
-			}
-		}
-		
-		/// <summary>
-		/// Using the given tlvData byte array and the given starting index, inserts
-		/// the tag and value(as a byte array)into the hashtable.  Note that the
-		/// tlvData needs to be in the SMPP v3.4 format(tag, length, value).  This 
-		/// assumes that the tag and length (from the tlvData array) are in network byte order.
-		///
-		/// Note also that this will advance the index by the TLV data length so that
-		/// it may be used for consecutive reads from the same array.
-		/// </summary>
-		/// <param name="tlvData">The TLV data as a byte array.</param>
-		/// <param name="index">The index of the array to start reading from.</param>
-		private void InjectTlv(byte[] tlvData, ref Int32 index)
-		{
-			byte[] temp = new byte[2];
-			temp[0] = tlvData[index];
-			temp[1] = tlvData[index + 1];
-			
-			#if DEBUG
-			Console.WriteLine("tag bytes " + temp[0].ToString("X").PadLeft(2, '0') + 
-			                  temp[1].ToString("X").PadLeft(2, '0'));
-			#endif
-			
-			UInt16 tag = BitConverter.ToUInt16(temp, 0);
-			index += 2;
-			temp[0] = tlvData[index];
-			temp[1] = tlvData[index + 1];
-			UInt16 length = UnsignedNumConverter.SwapByteOrdering(BitConverter.ToUInt16(temp, 0));
-			index += 2;
-			//decode the value
-			
-			#if DEBUG
-			Console.WriteLine("TLV Length " + length);
-			#endif
-			
-			ArrayList data = new ArrayList(length);
-			
-			int total = index + length;
-			for(int k = index;(k < index + length)&& k < tlvData.Length; k++)
-			{
-				data.Add(tlvData[k]);
-			}
-			
-			data.TrimToSize();
-			//add the values to the hashtable
-			tlvTable.Add(tag, data.ToArray(typeof(byte)));
-			//set it up for the next run
-			index += length;
-		}
+    /// <summary>
+    /// Tag, length, value table for SMPP PDUs.  The methods in this class assume 
+    /// that the tag passed in is already in network byte order.
+    /// </summary>
+    public class TlvTable
+    {
+        private Hashtable tlvTable;
+
+        /// <summary>
+        /// Creates a TLV table.
+        /// </summary>
+        public TlvTable()
+        {
+            tlvTable = new Hashtable();
+            tlvTable = Hashtable.Synchronized(tlvTable);
+        }
+
+        /// <summary>
+        /// Converts the TLV byte array data into the Hashtable.  This will check if
+        /// the passed in data is null or is an empty array so you don't need to
+        /// check it before calling this method.  This is equivalent to
+        /// TranslateTlvDataIntoTable(tlvData, 0).
+        /// </summary>
+        /// <param name="tlvData">The bytes of TLVs.</param>
+        public void TranslateTlvDataIntoTable(byte[] tlvData)
+        {
+            TranslateTlvDataIntoTable(tlvData, 0);
+        }
+
+        /// <summary>
+        /// Converts the TLV byte array data into the Hashtable.  This will check if
+        /// the passed in data is null or is an empty array so you don't need to check
+        /// it before calling this method.
+        /// </summary>
+        /// <param name="tlvData">The bytes of TLVs.</param>
+        /// <param name="index">The index of the byte array to start at.  This is here
+        /// because in some instances you may not want to start at the
+        /// beginning.</param>
+        public void TranslateTlvDataIntoTable(byte[] tlvData, Int32 index)
+        {
+            if (tlvData == null || tlvData.Length <= 0)
+            {
+                return;
+            }
+
+            //go through and decode the TLVs
+            while (index < tlvData.Length)
+            {
+                InjectTlv(tlvData, ref index);
+            }
+        }
+
+        /// <summary>
+        /// Using the given tlvData byte array and the given starting index, inserts
+        /// the tag and value(as a byte array)into the hashtable.  Note that the
+        /// tlvData needs to be in the SMPP v3.4 format(tag, length, value).  This 
+        /// assumes that the tag and length (from the tlvData array) are in network byte order.
+        ///
+        /// Note also that this will advance the index by the TLV data length so that
+        /// it may be used for consecutive reads from the same array.
+        /// </summary>
+        /// <param name="tlvData">The TLV data as a byte array.</param>
+        /// <param name="index">The index of the array to start reading from.</param>
+        private void InjectTlv(byte[] tlvData, ref Int32 index)
+        {
+            byte[] temp = new byte[2];
+            temp[0] = tlvData[index];
+            temp[1] = tlvData[index + 1];
+
+#if DEBUG
+            Console.WriteLine("tag bytes " + temp[0].ToString("X").PadLeft(2, '0') +
+                              temp[1].ToString("X").PadLeft(2, '0'));
+#endif
+
+            UInt16 tag = BitConverter.ToUInt16(temp, 0);
+            index += 2;
+            temp[0] = tlvData[index];
+            temp[1] = tlvData[index + 1];
+            UInt16 length = UnsignedNumConverter.SwapByteOrdering(BitConverter.ToUInt16(temp, 0));
+            index += 2;
+            //decode the value
+
+#if DEBUG
+            Console.WriteLine("TLV Length " + length);
+#endif
+
+            ArrayList data = new ArrayList(length);
+
+            int total = index + length;
+            for (int k = index; (k < index + length) && k < tlvData.Length; k++)
+            {
+                data.Add(tlvData[k]);
+            }
+
+            data.TrimToSize();
+            //add the values to the hashtable
+            tlvTable.Add(tag, data.ToArray(typeof(byte)));
+            //set it up for the next run
+            index += length;
+        }
 
 #if false // Deprecated API
 		/// <summary>
@@ -250,109 +248,117 @@ namespace AberrantSMPP.Utility
 		}
 #endif
 
-		#region NEW API
-		/// <summary>
-		/// Gets the bytes.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <returns></returns>
-		public byte[] GetBytes(UInt16 tag)
-		{
-			if (!tlvTable.ContainsKey(tag) || tlvTable[tag] == null)
-				throw new ApplicationException("TLV tag " + tag + " not found.");
+        #region NEW API
 
-			return (byte[])tlvTable[tag];
-		}
-		/// <summary>
-		/// Gets the byte.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <returns></returns>
-		public byte GetByte(UInt16 tag)
-		{
-			return GetBytes(tag)[0];
-		}
-		/// <summary>
-		/// Sets the specified tag.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <param name="value">The value.</param>
-		public void Set(UInt16 tag, byte value)
-		{
-			Set(tag, new[] { value });
-		}
-		/// <summary>
-		/// Sets the specified tag.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <param name="value">The value.</param>
-		public void Set(UInt16 tag, byte[] value)
-		{
-			if (value == null)
-				throw new ArgumentNullException("value");
+        /// <summary>
+        /// Gets the bytes.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <returns></returns>
+        public byte[] GetBytes(UInt16 tag)
+        {
+            if (!tlvTable.ContainsKey(tag) || tlvTable[tag] == null)
+                throw new ApplicationException("TLV tag " + tag + " not found.");
 
-			if (value.Length > UInt16.MaxValue)
-				throw new ArgumentException("Parameter value for tag '" + tag + "' is too large.");
-			
-			tlvTable[tag] = value;
-		}
-		/// <summary>
-		/// Determines whether this TlvTable contains the specified key.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		/// <returns>
-		/// 	<c>true</c> if contains the key; otherwise, <c>false</c>.
-		/// </returns>
-		public bool ContainsKey(UInt16 tag)
-		{
-			return tlvTable.ContainsKey(tag);
-		}
-		/// <summary>
-		/// Removes the specified tag.
-		/// </summary>
-		/// <param name="tag">The tag.</param>
-		public void Remove(UInt16 tag)
-		{
-			tlvTable.Remove(tag);
-		}
-		#endregion
+            return (byte[]) tlvTable[tag];
+        }
 
-		/// <summary>
-		/// Iterates through the hashtable, gathering the tag, length, and
-		/// value as it goes.  For each entry, it encodes the TLV into a byte
-		/// array.  It is assumed that the tags and length are already in network 
-		/// byte order.
-		/// </summary>
-		/// <returns>An ArrayList consisting of byte array entries, each of which
-		/// is a TLV.  Returns an empty ArrayList if the TLV table is empty.</returns>
-		public ArrayList GenerateByteEncodedTlv()
-		{
-			if(tlvTable == null || tlvTable.Count <= 0)
-			{
-				return new ArrayList(0);
-			}
-			
-			ArrayList tlvs = new ArrayList();
-			IDictionaryEnumerator iterator = tlvTable.GetEnumerator();
-			ArrayList elem = new ArrayList();
-			while(iterator.MoveNext())
-			{
-				elem.Clear();
-				//tag-2 bytes
-				elem.AddRange(BitConverter.GetBytes(((UInt16)iterator.Key)));
-				//length-2 bytes
-				byte[] nextVal = (byte[])iterator.Value;
-				UInt16 tlvLength = UnsignedNumConverter.SwapByteOrdering(((UInt16)(nextVal).Length));
-				elem.AddRange(BitConverter.GetBytes(tlvLength));
-				//value
-				elem.AddRange(nextVal);
-				elem.TrimToSize();
-				//copy it over to a byte array
-				tlvs.Add(elem.ToArray(typeof(byte)));
-			}
-			tlvs.TrimToSize();
-			
-			return tlvs;
-		}
-	}
+        /// <summary>
+        /// Gets the byte.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <returns></returns>
+        public byte GetByte(UInt16 tag)
+        {
+            return GetBytes(tag)[0];
+        }
+
+        /// <summary>
+        /// Sets the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <param name="value">The value.</param>
+        public void Set(UInt16 tag, byte value)
+        {
+            Set(tag, new[] { value });
+        }
+
+        /// <summary>
+        /// Sets the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <param name="value">The value.</param>
+        public void Set(UInt16 tag, byte[] value)
+        {
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            if (value.Length > UInt16.MaxValue)
+                throw new ArgumentException("Parameter value for tag '" + tag + "' is too large.");
+
+            tlvTable[tag] = value;
+        }
+
+        /// <summary>
+        /// Determines whether this TlvTable contains the specified key.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <returns>
+        /// 	<c>true</c> if contains the key; otherwise, <c>false</c>.
+        /// </returns>
+        public bool ContainsKey(UInt16 tag)
+        {
+            return tlvTable.ContainsKey(tag);
+        }
+
+        /// <summary>
+        /// Removes the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        public void Remove(UInt16 tag)
+        {
+            tlvTable.Remove(tag);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Iterates through the hashtable, gathering the tag, length, and
+        /// value as it goes.  For each entry, it encodes the TLV into a byte
+        /// array.  It is assumed that the tags and length are already in network 
+        /// byte order.
+        /// </summary>
+        /// <returns>An ArrayList consisting of byte array entries, each of which
+        /// is a TLV.  Returns an empty ArrayList if the TLV table is empty.</returns>
+        public ArrayList GenerateByteEncodedTlv()
+        {
+            if (tlvTable == null || tlvTable.Count <= 0)
+            {
+                return new ArrayList(0);
+            }
+
+            ArrayList tlvs = new ArrayList();
+            IDictionaryEnumerator iterator = tlvTable.GetEnumerator();
+            ArrayList elem = new ArrayList();
+            while (iterator.MoveNext())
+            {
+                elem.Clear();
+                //tag-2 bytes
+                elem.AddRange(BitConverter.GetBytes(((UInt16) iterator.Key)));
+                //length-2 bytes
+                byte[] nextVal = (byte[]) iterator.Value;
+                UInt16 tlvLength = UnsignedNumConverter.SwapByteOrdering(((UInt16) (nextVal).Length));
+                elem.AddRange(BitConverter.GetBytes(tlvLength));
+                //value
+                elem.AddRange(nextVal);
+                elem.TrimToSize();
+                //copy it over to a byte array
+                tlvs.Add(elem.ToArray(typeof(byte)));
+            }
+
+            tlvs.TrimToSize();
+
+            return tlvs;
+        }
+    }
 }

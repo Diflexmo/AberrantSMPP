@@ -16,44 +16,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections;
-using AberrantSMPP.Utility;
 
-namespace AberrantSMPP.Packet.Request
+namespace Aberrant.SMPP.Core.Packet.Request
 {
-	/// <summary>
-	/// Class to issue an unbind request to the SMSC.
-	/// </summary>
-	public class SmppUnbind : SmppRequest
-	{	
-		protected override CommandId DefaultCommandId { get { return CommandId.unbind; } }
+    /// <summary>
+    /// Class to issue an unbind request to the SMSC.
+    /// </summary>
+    public class SmppUnbind : SmppRequest
+    {
+        protected override CommandId DefaultCommandId => CommandId.unbind;
 
-		#region constructors
-		
-		/// <summary>
-		/// Creates an unbind PDU.
-		/// </summary>
-		public SmppUnbind(): base()
-		{}
-		
-		/// <summary>
-		/// Creates an unbind PDU.
-		/// </summary>
-		/// <param name="incomingBytes">The bytes received from an ESME.</param>
-		public SmppUnbind(byte[] incomingBytes): base(incomingBytes)
-		{}
-		
-		#endregion constructors
-						
-		/// <summary>
-		/// This decodes the query_sm Pdu.
-		/// </summary>
-		protected override void DecodeSmscResponse()
-		{
-			byte[] remainder = BytesAfterHeader;
-			
-			TranslateTlvDataIntoTable(remainder);
-		}
-	}
+        #region constructors
+
+        /// <summary>
+        /// Creates an unbind PDU.
+        /// </summary>
+        public SmppUnbind() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates an unbind PDU.
+        /// </summary>
+        /// <param name="incomingBytes">The bytes received from an ESME.</param>
+        public SmppUnbind(byte[] incomingBytes) : base(incomingBytes)
+        {
+        }
+
+        #endregion constructors
+
+        /// <summary>
+        /// This decodes the query_sm Pdu.
+        /// </summary>
+        protected override void DecodeSmscResponse()
+        {
+            byte[] remainder = BytesAfterHeader;
+
+            TranslateTlvDataIntoTable(remainder);
+        }
+    }
 }

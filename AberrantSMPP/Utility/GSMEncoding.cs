@@ -1,321 +1,323 @@
 ﻿using System;
-using System.IO;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 
-namespace AberrantSMPP.Utility
+namespace Aberrant.SMPP.Core.Utility
 {
-	// See: http://www.dreamfabric.com/sms/default_alphabet.html
+    // See: http://www.dreamfabric.com/sms/default_alphabet.html
 
-	// TODO: Create a real Encoding by deriving from System.Text.Encoding.
-	// OPTIMIZE: Implement unsafe methods to improve performance. (pruiz)
-	/// <summary>
-	/// GSM (03.38) Encoding class.
-	/// </summary>
-	public class GSMEncoding : Encoding
-	{
-		#region Ucs2Gsm Tables.
-		private const byte NOCHAR = 0xFF;
-		private const byte ESCAPE = 0x1B;
+    // TODO: Create a real Encoding by deriving from System.Text.Encoding.
+    // OPTIMIZE: Implement unsafe methods to improve performance. (pruiz)
+    /// <summary>
+    /// GSM (03.38) Encoding class.
+    /// </summary>
+    public class GSMEncoding : Encoding
+    {
+        #region Ucs2Gsm Tables.
 
-		private static byte[] Ucs2ToGsm =
-		{           
-			/*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
-			/*0x00*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	0x0a,	NOCHAR,	NOCHAR,	0x0D,	NOCHAR,	NOCHAR,	
-			/*0x10*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x20*/		0x20,	0x21,	0x22,	0x23,	0x02,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2a,	0x2b,	0x2c,	0x2D,	0x2e,	0x2f,	
-			/*0x30*/		0x30,	0x31,	0x32,	0x33,	0x34,	0x35,	0x36,	0x37,	0x38,	0x39,	0x3a,	0x3b,	0x3c,	0x3D,	0x3e,	0x3f,	
-			/*0x40*/		0x00,	0x41,	0x42,	0x43,	0x44,	0x45,	0x46,	0x47,	0x48,	0x49,	0x4a,	0x4b,	0x4c,	0x4D,	0x4e,	0x4f,	
-			/*0x50*/		0x50,	0x51,	0x52,	0x53,	0x54,	0x55,	0x56,	0x57,	0x58,	0x59,	0x5a,	ESCAPE,	ESCAPE,	ESCAPE,	ESCAPE,	0x11,	
-			/*0x60*/		0x27,	0x61,	0x62,	0x63,	0x64,	0x65,	0x66,	0x67,	0x68,	0x69,	0x6a,	0x6b,	0x6c,	0x6D,	0x6e,	0x6f,	
-			/*0x70*/		0x70,	0x71,	0x72,	0x73,	0x74,	0x75,	0x76,	0x77,	0x78,	0x79,	0x7a,	ESCAPE,	ESCAPE,	ESCAPE,	ESCAPE,	NOCHAR,
-			/*0x80*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x90*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xa0*/		NOCHAR,	0x40,	NOCHAR,	0x01,	0x24,	0x03,	NOCHAR,	0x5f,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xb0*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	0x60,	
-			/*0xc0*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	0x5b,	0x0e,	0x1c,	0x09,	NOCHAR,	0x1f,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	0x60,	
-			/*0xd0*/		NOCHAR,	0x5D,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	0x5c,	NOCHAR,	0x0b,	NOCHAR,	NOCHAR,	NOCHAR,	0x5e,	NOCHAR,	NOCHAR,	0x1e,	
-			/*0xe0*/		0x7f,	NOCHAR,	NOCHAR,	NOCHAR,	0x7b,	0x0f,	0x1D,	NOCHAR,	0x04,	0x05,	NOCHAR,	NOCHAR,	0x07,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xf0*/		NOCHAR,	0x7D,	0x08,	NOCHAR,	NOCHAR,	NOCHAR,	0x7c,	NOCHAR,	0x0c,	0x06,	NOCHAR,	NOCHAR,	0x7e,	NOCHAR,	NOCHAR,	NOCHAR
-		};
+        private const byte NOCHAR = 0xFF;
+        private const byte ESCAPE = 0x1B;
 
-		private static byte[] Ucs2ToGsmExtended =
-		{
-			/*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
-			/*0x0x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	 0x0A,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x1x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x2x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x3x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x4x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x5x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	 0x3c,	 0x2f,	 0x3e,	 0x14,	NOCHAR,	
-			/*0x6x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x7x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	 0x28,	 0x40,	 0x29,	 0x3d,	NOCHAR,	
-			/*0x8x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0x9x*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xAx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xBx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xCx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xDx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xEx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	
-			/*0xFx*/		NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR,	NOCHAR
-		};
+        private static byte[] Ucs2ToGsm =
+        {
+            /*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
+            /*0x00*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x0a, NOCHAR, NOCHAR, 0x0D, NOCHAR, NOCHAR,
+            /*0x10*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x20*/ 0x20, 0x21, 0x22, 0x23, 0x02, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2D, 0x2e, 0x2f,
+            /*0x30*/ 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3D, 0x3e, 0x3f,
+            /*0x40*/ 0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4D, 0x4e, 0x4f,
+            /*0x50*/ 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, ESCAPE, ESCAPE, ESCAPE, ESCAPE, 0x11,
+            /*0x60*/ 0x27, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6D, 0x6e, 0x6f,
+            /*0x70*/ 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, ESCAPE, ESCAPE, ESCAPE, ESCAPE, NOCHAR,
+            /*0x80*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x90*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xa0*/ NOCHAR, 0x40, NOCHAR, 0x01, 0x24, 0x03, NOCHAR, 0x5f, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xb0*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x60,
+            /*0xc0*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x5b, 0x0e, 0x1c, 0x09, NOCHAR, 0x1f, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x60,
+            /*0xd0*/ NOCHAR, 0x5D, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x5c, NOCHAR, 0x0b, NOCHAR, NOCHAR, NOCHAR, 0x5e, NOCHAR, NOCHAR, 0x1e,
+            /*0xe0*/ 0x7f, NOCHAR, NOCHAR, NOCHAR, 0x7b, 0x0f, 0x1D, NOCHAR, 0x04, 0x05, NOCHAR, NOCHAR, 0x07, NOCHAR, NOCHAR, NOCHAR,
+            /*0xf0*/ NOCHAR, 0x7D, 0x08, NOCHAR, NOCHAR, NOCHAR, 0x7c, NOCHAR, 0x0c, 0x06, NOCHAR, NOCHAR, 0x7e, NOCHAR, NOCHAR, NOCHAR
+        };
 
-		private const int Ucs2GclToGsmBase = 0x0391;
-		private static byte[] Ucs2GclToGsm =
-		{
-			/*0x0391*/  0x41, // Alpha A
-			/*0x0392*/  0x42, // Beta B
-			/*0x0393*/  0x13, // Gamma
-			/*0x0394*/  0x10, // Delta
-			/*0x0395*/  0x45, // Epsilon E
-			/*0x0396*/  0x5A, // Zeta Z
-			/*0x0397*/  0x48, // Eta H
-			/*0x0398*/  0x19, // Theta
-			/*0x0399*/  0x49, // Iota I
-			/*0x039a*/  0x4B, // Kappa K
-			/*0x039b*/  0x14, // Lambda
-			/*0x039c*/  0x4D, // Mu M
-			/*0x039d*/  0x4E, // Nu N
-			/*0x039e*/  0x1A, // Xi
-			/*0x039f*/  0x4F, // Omicron O
-			/*0x03a0*/  0x16, // Pi
-			/*0x03a1*/  0x50, // Rho P
-			/*0x03a2*/  NOCHAR,
-			/*0x03a3*/  0x18, // Sigma
-			/*0x03a4*/  0x54, // Tau T
-			/*0x03a5*/  0x59, // Upsilon Y
-			/*0x03a6*/  0x12, // Phi 
-			/*0x03a7*/  0x58, // Chi X
-			/*0x03a8*/  0x17, // Psi
-			/*0x03a9*/  0x15  // Omega
-		};
-		private static int Ucs2GclToGsmMax = Ucs2GclToGsmBase + Ucs2GclToGsm.Length;
-		#endregion
+        private static byte[] Ucs2ToGsmExtended =
+        {
+            /*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
+            /*0x0x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x0A, NOCHAR, NOCHAR, NOCHAR,
+            /*0x1x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x2x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x3x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x4x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x5x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x3c, 0x2f, 0x3e, 0x14, NOCHAR,
+            /*0x6x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x7x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, 0x28, 0x40, 0x29, 0x3d, NOCHAR,
+            /*0x8x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0x9x*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xAx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xBx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xCx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xDx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xEx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR,
+            /*0xFx*/ NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR, NOCHAR
+        };
 
-		#region Gsm2Ucs Tables
-		private static char NOCODE = '\xFFFF';
-		private static char UESCAPE = '\xA0';
+        private const int Ucs2GclToGsmBase = 0x0391;
 
-		private static char[] GsmToUcs2 = new char[] {
-			/*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
-			/*0x0x*/		'\x40',	'\xA3',	'\x24',	'\xA5',	'\xE8',	'\xE9',	'\xF9',	'\xEC',	'\xF2',	'\xE7',	'\x0A',	'\xD8',	'\xF8',	'\x0D',	'\xC5',	'\xE5',	 
-			/*0x1x*/		'\x394',	'\x5F',	'\x3A6',	'\x393',	'\x39B',	'\x3A9',	'\x3A0',	'\x3A8',	'\x3A3',	'\x398',	'\x39E',	'\xA0',	'\xC6',	'\xE6',	'\xDF',	'\xC9',	
-			/*0x2x*/		'\x20',	'\x21',	'\x22',	'\x23',	'\xA4',	'\x25',	'\x26',	'\x27',	'\x28',	'\x29',	'\x2A',	'\x2B',	'\x2C',	'\x2D',	'\x2E',	'\x2F',	
-			/*0x3x*/		'\x30',	'\x31',	'\x32',	'\x33',	'\x34',	'\x35',	'\x36',	'\x37',	'\x38',	'\x39',	'\x3A',	'\x3B',	'\x3C',	'\x3D',	'\x3E',	'\x3F',	
-			/*0x4x*/		'\xA1',	'\x41',	'\x42',	'\x43',	'\x44',	'\x45',	'\x46',	'\x47',	'\x48',	'\x49',	'\x4A',	'\x4B',	'\x4C',	'\x4D',	'\x4E',	'\x4F',	
-			/*0x5x*/		'\x50',	'\x51',	'\x52',	'\x53',	'\x54',	'\x55',	'\x56',	'\x57',	'\x58',	'\x59',	'\x5A',	'\xC4',	'\xD6',	'\xD1',	'\xDC',	'\xA7',	
-			/*0x6x*/		'\xBF',	'\x61',	'\x62',	'\x63',	'\x64',	'\x65',	'\x66',	'\x67',	'\x68',	'\x69',	'\x6A',	'\x6B',	'\x6C',	'\x6D',	'\x6E',	'\x6F',	
-			/*0x7x*/		'\x70',	'\x71',	'\x72',	'\x73',	'\x74',	'\x75',	'\x76',	'\x77',	'\x78',	'\x79',	'\x7A',	'\xE4',	'\xF6',	'\xF1',	'\xFC',	'\xE0'
-		};
+        private static byte[] Ucs2GclToGsm =
+        {
+            /*0x0391*/ 0x41, // Alpha A
+            /*0x0392*/ 0x42, // Beta B
+            /*0x0393*/ 0x13, // Gamma
+            /*0x0394*/ 0x10, // Delta
+            /*0x0395*/ 0x45, // Epsilon E
+            /*0x0396*/ 0x5A, // Zeta Z
+            /*0x0397*/ 0x48, // Eta H
+            /*0x0398*/ 0x19, // Theta
+            /*0x0399*/ 0x49, // Iota I
+            /*0x039a*/ 0x4B, // Kappa K
+            /*0x039b*/ 0x14, // Lambda
+            /*0x039c*/ 0x4D, // Mu M
+            /*0x039d*/ 0x4E, // Nu N
+            /*0x039e*/ 0x1A, // Xi
+            /*0x039f*/ 0x4F, // Omicron O
+            /*0x03a0*/ 0x16, // Pi
+            /*0x03a1*/ 0x50, // Rho P
+            /*0x03a2*/ NOCHAR,
+            /*0x03a3*/ 0x18, // Sigma
+            /*0x03a4*/ 0x54, // Tau T
+            /*0x03a5*/ 0x59, // Upsilon Y
+            /*0x03a6*/ 0x12, // Phi 
+            /*0x03a7*/ 0x58, // Chi X
+            /*0x03a8*/ 0x17, // Psi
+            /*0x03a9*/ 0x15 // Omega
+        };
 
-		private static char[] GsmToUcs2Extended = new char[] {
-			/*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
-			/*0x0x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	'\x0C',	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	 
-			/*0x1x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	'\x5E',	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	
-			/*0x2x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	'\x7B',	'\x7D',	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	'\x5C',	
-			/*0x3x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	'\x5B',	'\x7E',	'\x5D',	NOCODE,	
-			/*0x4x*/		'\x7C',	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	
-			/*0x5x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	
-			/*0x6x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	
-			/*0x7x*/		NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE,	NOCODE
-		};
-		#endregion
+        private static int Ucs2GclToGsmMax = Ucs2GclToGsmBase + Ucs2GclToGsm.Length;
 
-		#region Instance fields..
-		private bool useBestFitFallback = false;
-		private bool throwOnInvalidCharacter = false;
-		private EncoderFallbackBuffer _encoderFb = null;
-		private DecoderFallbackBuffer _decoderFb = null;
-		#endregion
+        #endregion
 
-		#region Properties
-		public override string EncodingName
-		{
-			get
-			{
-				return "GSMEncoding";
-			}
-		}
+        #region Gsm2Ucs Tables
 
-		public override string BodyName
-		{
-			get
-			{
-				return "GSM";
-			}
-		}
-		#endregion
+        private static char NOCODE = '\xFFFF';
+        private static char UESCAPE = '\xA0';
 
-		#region .ctors
-		public GSMEncoding() : this (false)
-		{
-		}
+        private static char[] GsmToUcs2 = new char[]
+        {
+            /*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
+            /*0x0x*/ '\x40', '\xA3', '\x24', '\xA5', '\xE8', '\xE9', '\xF9', '\xEC', '\xF2', '\xE7', '\x0A', '\xD8', '\xF8', '\x0D', '\xC5', '\xE5',
+            /*0x1x*/ '\x394', '\x5F', '\x3A6', '\x393', '\x39B', '\x3A9', '\x3A0', '\x3A8', '\x3A3', '\x398', '\x39E', '\xA0', '\xC6', '\xE6', '\xDF', '\xC9',
+            /*0x2x*/ '\x20', '\x21', '\x22', '\x23', '\xA4', '\x25', '\x26', '\x27', '\x28', '\x29', '\x2A', '\x2B', '\x2C', '\x2D', '\x2E', '\x2F',
+            /*0x3x*/ '\x30', '\x31', '\x32', '\x33', '\x34', '\x35', '\x36', '\x37', '\x38', '\x39', '\x3A', '\x3B', '\x3C', '\x3D', '\x3E', '\x3F',
+            /*0x4x*/ '\xA1', '\x41', '\x42', '\x43', '\x44', '\x45', '\x46', '\x47', '\x48', '\x49', '\x4A', '\x4B', '\x4C', '\x4D', '\x4E', '\x4F',
+            /*0x5x*/ '\x50', '\x51', '\x52', '\x53', '\x54', '\x55', '\x56', '\x57', '\x58', '\x59', '\x5A', '\xC4', '\xD6', '\xD1', '\xDC', '\xA7',
+            /*0x6x*/ '\xBF', '\x61', '\x62', '\x63', '\x64', '\x65', '\x66', '\x67', '\x68', '\x69', '\x6A', '\x6B', '\x6C', '\x6D', '\x6E', '\x6F',
+            /*0x7x*/ '\x70', '\x71', '\x72', '\x73', '\x74', '\x75', '\x76', '\x77', '\x78', '\x79', '\x7A', '\xE4', '\xF6', '\xF1', '\xFC', '\xE0'
+        };
 
-		public GSMEncoding(bool throwOnInvalidCharacter)
-		{
-			this.throwOnInvalidCharacter = throwOnInvalidCharacter;
-		}
+        private static char[] GsmToUcs2Extended = new char[]
+        {
+            /*			+0xX0	+0xX1	+0xX2	+0xX3	+0xX4	+0xX5	+0xX6	+0xX7	+0xX8	+0xX9	+0xXa	+0xXb	+0xXc	+0xXd	+0xXe	+0xXf */
+            /*0x0x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, '\x0C', NOCODE, NOCODE, NOCODE, NOCODE, NOCODE,
+            /*0x1x*/ NOCODE, NOCODE, NOCODE, NOCODE, '\x5E', NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE,
+            /*0x2x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, '\x7B', '\x7D', NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, '\x5C',
+            /*0x3x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, '\x5B', '\x7E', '\x5D', NOCODE,
+            /*0x4x*/ '\x7C', NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE,
+            /*0x5x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE,
+            /*0x6x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE,
+            /*0x7x*/ NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE, NOCODE
+        };
 
-		public GSMEncoding(bool useBestFitFallback, bool throwOnInvalidCharacter)
-			: this(throwOnInvalidCharacter)
-		{
-			this.useBestFitFallback = useBestFitFallback;
-		}
-		#endregion
+        #endregion
 
-		#region UCS -> GSM conversion methods..
-		public new EncoderFallback EncoderFallback
-		{
-			get { 
-				var obj = throwOnInvalidCharacter ? EncoderFallback.ExceptionFallback : base.EncoderFallback;
-				return useBestFitFallback ? new GSMBestFitEncoderFallback(obj) : obj;
-			}
-		}
+        #region Instance fields..
 
-		private EncoderFallbackBuffer EncoderFallbackBuffer
-		{
-			get
-			{
-				if (_encoderFb == null)
-					_encoderFb = EncoderFallback.CreateFallbackBuffer();
+        private bool useBestFitFallback = false;
+        private bool throwOnInvalidCharacter = false;
+        private EncoderFallbackBuffer _encoderFb = null;
+        private DecoderFallbackBuffer _decoderFb = null;
 
-				return _encoderFb;
-			}
-		}
+        #endregion
 
-		public static bool IsValidChar(char character)
-		{
-			var @byte = NOCHAR;
-			var escape = false;
+        #region Properties
 
-			if (character < Ucs2ToGsm.Length)
-			{
-				@byte = Ucs2ToGsm[character];
+        public override string EncodingName => "GSMEncoding";
 
-				if (@byte == ESCAPE)
-				{
-					escape = true;
-					@byte = Ucs2ToGsmExtended[character];
-				}
-			}
-			else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
-			{
-				escape = true;
-				@byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
-			}
-			else if (character == '\x20AC') // Euro sign.
-			{
-				escape = true;
-				@byte = 0x65;
-			}
+        public override string BodyName => "GSM";
 
-			return @byte != NOCHAR;
-		}
+        #endregion
 
-		public static bool IsValidString(string text)
-		{
-			foreach (var character in text.ToCharArray())
-			{
-				var @byte = NOCHAR;
-				var escape = false;
+        #region .ctors
 
-				if (character < Ucs2ToGsm.Length)
-				{
-					@byte = Ucs2ToGsm[character];
+        public GSMEncoding() : this(false)
+        {
+        }
 
-					if (@byte == ESCAPE)
-					{
-						escape = true;
-						@byte = Ucs2ToGsmExtended[character];
-					}
-				}
-				else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
-				{
-					escape = true;
-					@byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
-				}
-				else if (character == '\x20AC') // Euro sign.
-				{
-					escape = true;
-					@byte = 0x65;
-				}
+        public GSMEncoding(bool throwOnInvalidCharacter)
+        {
+            this.throwOnInvalidCharacter = throwOnInvalidCharacter;
+        }
 
-				if (@byte == NOCHAR)
-					return false;
-			}
+        public GSMEncoding(bool useBestFitFallback, bool throwOnInvalidCharacter)
+            : this(throwOnInvalidCharacter)
+        {
+            this.useBestFitFallback = useBestFitFallback;
+        }
 
-			return true;
-		}
+        #endregion
 
-		private int GetBytesInternal(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			var outpos = byteIndex;
+        #region UCS -> GSM conversion methods..
 
-			for (var inpos = charIndex; inpos < (charIndex + charCount); inpos++)
-			{
-				var character = chars[inpos];
-				var @byte = NOCHAR;
-				var escape = false;
+        public new EncoderFallback EncoderFallback
+        {
+            get
+            {
+                var obj = throwOnInvalidCharacter ? EncoderFallback.ExceptionFallback : base.EncoderFallback;
+                return useBestFitFallback ? new GSMBestFitEncoderFallback(obj) : obj;
+            }
+        }
 
-				if (character < Ucs2ToGsm.Length)
-				{
-					@byte = Ucs2ToGsm[character];
+        private EncoderFallbackBuffer EncoderFallbackBuffer
+        {
+            get
+            {
+                if (_encoderFb == null)
+                    _encoderFb = EncoderFallback.CreateFallbackBuffer();
 
-					if (@byte == ESCAPE)
-					{
-						escape = true;
-						@byte = Ucs2ToGsmExtended[character];
-					}
-				}
-				else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
-				{
-					escape = true;
-					@byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
-				}
-				else if (character == '\x20AC') // Euro sign.
-				{
-					escape = true;
-					@byte = 0x65;
-				}
+                return _encoderFb;
+            }
+        }
 
-				if (@byte == NOCHAR)
-				{
-					char tmp;
-					EncoderFallbackBuffer.Fallback(character, inpos);
+        public static bool IsValidChar(char character)
+        {
+            var @byte = NOCHAR;
+            var escape = false;
 
-					while ((tmp = EncoderFallbackBuffer.GetNextChar()) != 0)
-					{
-						if (bytes != null)
-							bytes[outpos++] = Ucs2ToGsm[tmp]; // FIXME: Character might not be a 7-bit one..
-						else
-							outpos++;
-					}
+            if (character < Ucs2ToGsm.Length)
+            {
+                @byte = Ucs2ToGsm[character];
 
-					EncoderFallbackBuffer.Reset();
-				}
-				else
-				{
-					if (bytes != null)
-					{
-						if (escape)
-							bytes[outpos++] = ESCAPE;
-						bytes[outpos++] = @byte;
-					}
-					else
-					{
-						outpos += escape ? 2 : 1;
-					}
-				}
-			}
+                if (@byte == ESCAPE)
+                {
+                    escape = true;
+                    @byte = Ucs2ToGsmExtended[character];
+                }
+            }
+            else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
+            {
+                escape = true;
+                @byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
+            }
+            else if (character == '\x20AC') // Euro sign.
+            {
+                escape = true;
+                @byte = 0x65;
+            }
 
-			return outpos - byteIndex;
-		}
+            return @byte != NOCHAR;
+        }
 
-		public override int GetMaxByteCount(int charCount)
-		{
-			return charCount * 2;
-		}
+        public static bool IsValidString(string text)
+        {
+            foreach (var character in text.ToCharArray())
+            {
+                var @byte = NOCHAR;
+                var escape = false;
+
+                if (character < Ucs2ToGsm.Length)
+                {
+                    @byte = Ucs2ToGsm[character];
+
+                    if (@byte == ESCAPE)
+                    {
+                        escape = true;
+                        @byte = Ucs2ToGsmExtended[character];
+                    }
+                }
+                else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
+                {
+                    escape = true;
+                    @byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
+                }
+                else if (character == '\x20AC') // Euro sign.
+                {
+                    escape = true;
+                    @byte = 0x65;
+                }
+
+                if (@byte == NOCHAR)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private int GetBytesInternal(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
+        {
+            var outpos = byteIndex;
+
+            for (var inpos = charIndex; inpos < (charIndex + charCount); inpos++)
+            {
+                var character = chars[inpos];
+                var @byte = NOCHAR;
+                var escape = false;
+
+                if (character < Ucs2ToGsm.Length)
+                {
+                    @byte = Ucs2ToGsm[character];
+
+                    if (@byte == ESCAPE)
+                    {
+                        escape = true;
+                        @byte = Ucs2ToGsmExtended[character];
+                    }
+                }
+                else if (character >= Ucs2GclToGsmBase && character <= Ucs2GclToGsmMax)
+                {
+                    escape = true;
+                    @byte = Ucs2GclToGsm[character - Ucs2GclToGsmBase];
+                }
+                else if (character == '\x20AC') // Euro sign.
+                {
+                    escape = true;
+                    @byte = 0x65;
+                }
+
+                if (@byte == NOCHAR)
+                {
+                    char tmp;
+                    EncoderFallbackBuffer.Fallback(character, inpos);
+
+                    while ((tmp = EncoderFallbackBuffer.GetNextChar()) != 0)
+                    {
+                        if (bytes != null)
+                            bytes[outpos++] = Ucs2ToGsm[tmp]; // FIXME: Character might not be a 7-bit one..
+                        else
+                            outpos++;
+                    }
+
+                    EncoderFallbackBuffer.Reset();
+                }
+                else
+                {
+                    if (bytes != null)
+                    {
+                        if (escape)
+                            bytes[outpos++] = ESCAPE;
+                        bytes[outpos++] = @byte;
+                    }
+                    else
+                    {
+                        outpos += escape ? 2 : 1;
+                    }
+                }
+            }
+
+            return outpos - byteIndex;
+        }
+
+        public override int GetMaxByteCount(int charCount)
+        {
+            return charCount * 2;
+        }
 
 #if UNSAFE_CODE
 		public unsafe override int GetByteCount(char* chars, int count)
@@ -355,17 +357,22 @@ namespace AberrantSMPP.Utility
 		}
 #endif
 
-		public override int GetByteCount(char[] chars, int index, int count)
-		{
-			if (chars == null) {
-				throw new ArgumentNullException ("chars");
-			}
-			if (index < 0 || index > chars.Length) {
-				throw new ArgumentOutOfRangeException ("index");
-			}
-			if (count < 0 || count > (chars.Length - index)) {
-				throw new ArgumentOutOfRangeException ("count");
-			}
+        public override int GetByteCount(char[] chars, int index, int count)
+        {
+            if (chars == null)
+            {
+                throw new ArgumentNullException("chars");
+            }
+
+            if (index < 0 || index > chars.Length)
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+
+            if (count < 0 || count > (chars.Length - index))
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
 
 #if UNSAFE_CODE
 			unsafe
@@ -376,341 +383,338 @@ namespace AberrantSMPP.Utility
 				}
 			}
 #else
-			return GetBytesInternal(chars, index, count, null, 0);
+            return GetBytesInternal(chars, index, count, null, 0);
 #endif
-		}
+        }
 
-		public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			return GetBytesInternal(chars, charIndex, charCount, bytes, byteIndex);
-		}
-		#endregion
+        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
+        {
+            return GetBytesInternal(chars, charIndex, charCount, bytes, byteIndex);
+        }
 
-		#region GSM -> UCS conversion methods..
-		private DecoderFallbackBuffer DecoderFallbackBuffer
-		{
-			get
-			{
-				if (_decoderFb == null)
-					_decoderFb = DecoderFallback.CreateFallbackBuffer();
+        #endregion
 
-				return _decoderFb;
-			}
-		}
+        #region GSM -> UCS conversion methods..
 
-		public new DecoderFallback DecoderFallback
-		{
-			get { return throwOnInvalidCharacter ? DecoderFallback.ExceptionFallback : base.DecoderFallback; }
-		}
+        private DecoderFallbackBuffer DecoderFallbackBuffer
+        {
+            get
+            {
+                if (_decoderFb == null)
+                    _decoderFb = DecoderFallback.CreateFallbackBuffer();
 
-		private int GetCharsInternal(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-		{
-			var outpos = byteIndex;
-			var escape = false;
+                return _decoderFb;
+            }
+        }
 
-			for (var inpos = byteIndex; inpos < (byteIndex + byteCount); inpos++)
-			{
-				var @byte = bytes[inpos];
-				var codepoint = NOCODE;
-				var extended = false;
+        public new DecoderFallback DecoderFallback => throwOnInvalidCharacter ? DecoderFallback.ExceptionFallback : base.DecoderFallback;
 
-				if (escape)
-				{
-					if (@byte == 0x65) codepoint = '\x20AC';
-					else codepoint = GsmToUcs2Extended[@byte];
+        private int GetCharsInternal(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+        {
+            var outpos = byteIndex;
+            var escape = false;
 
-					// If char is not a valid codepoint, use NBSP.
-					if (codepoint == NOCODE) codepoint = '\xA0';
+            for (var inpos = byteIndex; inpos < (byteIndex + byteCount); inpos++)
+            {
+                var @byte = bytes[inpos];
+                var codepoint = NOCODE;
+                var extended = false;
 
-					extended = true;
-					escape = false;
-				}
-				else if (@byte < GsmToUcs2.Length)
-				{
-					codepoint = GsmToUcs2[@byte];
+                if (escape)
+                {
+                    if (@byte == 0x65) codepoint = '\x20AC';
+                    else codepoint = GsmToUcs2Extended[@byte];
 
-					if (codepoint == UESCAPE)
-					{
-						escape = true;
-						continue;
-					}
-				}
+                    // If char is not a valid codepoint, use NBSP.
+                    if (codepoint == NOCODE) codepoint = '\xA0';
 
-				if (codepoint == NOCODE)
-				{
-					char tmp;
-					DecoderFallbackBuffer.Fallback(extended ? new byte[] { 0x1b, @byte } : new[] { @byte }, inpos);
+                    extended = true;
+                    escape = false;
+                }
+                else if (@byte < GsmToUcs2.Length)
+                {
+                    codepoint = GsmToUcs2[@byte];
 
-					while ((tmp = DecoderFallbackBuffer.GetNextChar()) != 0)
-					{
-						if (chars != null)
-							chars[outpos++] = GsmToUcs2[tmp]; // FIXME: Character might not be a 7-bit one..
-						else
-							outpos++;
-					}
-				}
-				else
-				{
-					if (chars != null)
-					{
-						chars[outpos++] = codepoint;
-					}
-					else
-					{
-						outpos += 1;
-					}
-				}
-			}
+                    if (codepoint == UESCAPE)
+                    {
+                        escape = true;
+                        continue;
+                    }
+                }
 
-			return outpos - charIndex;
-		}
+                if (codepoint == NOCODE)
+                {
+                    char tmp;
+                    DecoderFallbackBuffer.Fallback(extended ? new byte[] { 0x1b, @byte } : new[] { @byte }, inpos);
 
-		public override int GetMaxCharCount(int byteCount)
-		{
-			return byteCount;
-		}
+                    while ((tmp = DecoderFallbackBuffer.GetNextChar()) != 0)
+                    {
+                        if (chars != null)
+                            chars[outpos++] = GsmToUcs2[tmp]; // FIXME: Character might not be a 7-bit one..
+                        else
+                            outpos++;
+                    }
+                }
+                else
+                {
+                    if (chars != null)
+                    {
+                        chars[outpos++] = codepoint;
+                    }
+                    else
+                    {
+                        outpos += 1;
+                    }
+                }
+            }
 
-		public override int GetCharCount(byte[] bytes, int index, int count)
-		{
-			return GetCharsInternal(bytes, index, count, null, 0);
-		}
+            return outpos - charIndex;
+        }
 
-		public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-		{
-			return GetCharsInternal(bytes, byteIndex, byteCount, chars, charIndex);
-		}
-		#endregion
-	}
+        public override int GetMaxCharCount(int byteCount)
+        {
+            return byteCount;
+        }
 
-	public class PackedGSMEncoding : GSMEncoding
-	{
-		#region .ctors
-		public PackedGSMEncoding() : this (false)
-		{
-		}
+        public override int GetCharCount(byte[] bytes, int index, int count)
+        {
+            return GetCharsInternal(bytes, index, count, null, 0);
+        }
 
-		public PackedGSMEncoding(bool throwOnInvalidCharacter)
-			: base(throwOnInvalidCharacter)
-		{
-		}
+        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+        {
+            return GetCharsInternal(bytes, byteIndex, byteCount, chars, charIndex);
+        }
 
-		public PackedGSMEncoding(bool useBestFitFallback, bool throwOnInvalidCharacter)
-			: base(useBestFitFallback, throwOnInvalidCharacter)
-		{
-		}
-		#endregion
+        #endregion
+    }
 
+    public class PackedGSMEncoding : GSMEncoding
+    {
+        #region .ctors
 
-		#region Properties
-		public override string EncodingName
-		{
-			get
-			{
-				return "Packed-GSMEncoding";
-			}
-		}
+        public PackedGSMEncoding() : this(false)
+        {
+        }
 
-		public override string BodyName
-		{
-			get
-			{
-				return "Packed-GSM";
-			}
-		}
-		#endregion
+        public PackedGSMEncoding(bool throwOnInvalidCharacter)
+            : base(throwOnInvalidCharacter)
+        {
+        }
 
-		/// <summary>
-		/// Compacts a string of septets into octets.
-		/// </summary>
-		/// <remarks>
-		/// <par>When only 7 of 8 available bits of a character are used, 1 bit is
-		/// wasted per character. This method compacts a string of characters
-		/// which consist solely of such 7-bit characters.</par>
-		/// <par>Effectively, every 8 bytes of the original string are packed into
-		/// 7 bytes in the resulting string.</par>
-		/// </remarks>
-		private static byte[] ConvertTo7Bit(string data)
-		{
-			var output = new ArrayList();
-			string octetSecond = string.Empty;
-			for (int i = 0; i < data.Length; i++)
-			{
-				string current = System.Convert.ToString((byte)data[i], 2).PadLeft(7, '0');
-				if (i != 0 && i % 8 != 0)
-				{
-					string octetFirst = current.Substring(7 - i % 8);
-					string currentOctet = octetFirst + octetSecond;
-					output.Add(System.Convert.ToByte(currentOctet, 2));
-				}
-				octetSecond = current.Substring(0, 7 - i % 8);
-				if (i == data.Length - 1 && octetSecond != string.Empty)
-					output.Add(System.Convert.ToByte(octetSecond, 2));
-			}
+        public PackedGSMEncoding(bool useBestFitFallback, bool throwOnInvalidCharacter)
+            : base(useBestFitFallback, throwOnInvalidCharacter)
+        {
+        }
 
-			byte[] array = new byte[output.Count];
-			output.CopyTo(array);
-			return array;
-		}
+        #endregion
 
-		/// <summary>
-		/// DeCompress an array of bytes of octects into septets.
-		/// </summary>
-		/// <remarks>
-		/// <par>When all 8 available bits of a character are used, we only need 7
-		/// to get a 7-bit character.</par>
-		/// <par>Effectively, every 7 bytes from the original 8 byte are de-packed into
-		/// 8 bytes in the resulting string.</par>
-		/// </remarks>
-		private static string ConvertFrom7Bit(byte[] data)
-		{
-			var result = new StringBuilder();
-			var output = new ArrayList();
-			string septetSecond = string.Empty;
+        #region Properties
 
-			for (int i = 0; i < data.Length; i++)
-			{
-				string current = System.Convert.ToString((byte)data[i], 2).PadLeft(8, '0');
+        public override string EncodingName => "Packed-GSMEncoding";
 
-				if (i % 7 == 0 && i != 0)
-				{
-					output.Add(System.Convert.ToByte(septetSecond, 2));
-					septetSecond = string.Empty;
-				}
+        public override string BodyName => "Packed-GSM";
 
-				string septetFirst = current.Substring(8 - (7 - (i % 7)));
-				string currentSeptet = septetFirst + septetSecond;
-				output.Add(System.Convert.ToByte(currentSeptet, 2));
+        #endregion
 
-				septetSecond = current.Substring(0, 8 - (7 - (i % 7)));
+        /// <summary>
+        /// Compacts a string of septets into octets.
+        /// </summary>
+        /// <remarks>
+        /// <par>When only 7 of 8 available bits of a character are used, 1 bit is
+        /// wasted per character. This method compacts a string of characters
+        /// which consist solely of such 7-bit characters.</par>
+        /// <par>Effectively, every 8 bytes of the original string are packed into
+        /// 7 bytes in the resulting string.</par>
+        /// </remarks>
+        private static byte[] ConvertTo7Bit(string data)
+        {
+            var output = new ArrayList();
+            string octetSecond = string.Empty;
+            for (int i = 0; i < data.Length; i++)
+            {
+                string current = System.Convert.ToString((byte) data[i], 2).PadLeft(7, '0');
+                if (i != 0 && i % 8 != 0)
+                {
+                    string octetFirst = current.Substring(7 - i % 8);
+                    string currentOctet = octetFirst + octetSecond;
+                    output.Add(System.Convert.ToByte(currentOctet, 2));
+                }
 
-				if (i == data.Length - 1 && septetSecond != string.Empty)
-					output.Add(System.Convert.ToByte(septetSecond, 2));
-			}
+                octetSecond = current.Substring(0, 7 - i % 8);
+                if (i == data.Length - 1 && octetSecond != string.Empty)
+                    output.Add(System.Convert.ToByte(octetSecond, 2));
+            }
 
-			foreach (byte @byte in output)
-				result.Append(System.Convert.ToChar(@byte));
+            byte[] array = new byte[output.Count];
+            output.CopyTo(array);
+            return array;
+        }
 
-			return result.ToString();
-		}
+        /// <summary>
+        /// DeCompress an array of bytes of octects into septets.
+        /// </summary>
+        /// <remarks>
+        /// <par>When all 8 available bits of a character are used, we only need 7
+        /// to get a 7-bit character.</par>
+        /// <par>Effectively, every 7 bytes from the original 8 byte are de-packed into
+        /// 8 bytes in the resulting string.</par>
+        /// </remarks>
+        private static string ConvertFrom7Bit(byte[] data)
+        {
+            var result = new StringBuilder();
+            var output = new ArrayList();
+            string septetSecond = string.Empty;
 
-		public override byte[] GetBytes(string text)
-		{
-			return ConvertTo7Bit(text);
-		}
+            for (int i = 0; i < data.Length; i++)
+            {
+                string current = System.Convert.ToString((byte) data[i], 2).PadLeft(8, '0');
 
-		public override string GetString(byte[] bytes)
-		{
-			return ConvertFrom7Bit(bytes);
-		}
-	}
+                if (i % 7 == 0 && i != 0)
+                {
+                    output.Add(System.Convert.ToByte(septetSecond, 2));
+                    septetSecond = string.Empty;
+                }
 
-	internal class GSMBestFitEncoderFallback : EncoderFallback
-	{
-		#region Fallback Buffer implementation
-		public class GSMBestFitEncoderFallbackBuffer : EncoderFallbackBuffer
-		{
-			private EncoderFallbackBuffer LastResortEncoderFallbackBuffer;
-			private char? Data = null;
-			private int Pos = 0;
-			#region Character Table Mappings..
-			// ÁÉÍÓÚ ÀÈÌÒÙ áéíóú 
-			private static char[][] MapTable = new char[][] {
-				new char[] { 'Á', 'à' },
-				new char[] { 'Í', 'ì' },
-				new char[] { 'Ó', 'ò' },
-				new char[] { 'Ú', 'ù' },
+                string septetFirst = current.Substring(8 - (7 - (i % 7)));
+                string currentSeptet = septetFirst + septetSecond;
+                output.Add(System.Convert.ToByte(currentSeptet, 2));
 
-				new char[] { 'À', 'à' },
-				new char[] { 'È', 'É' },
-				new char[] { 'Ì', 'ì' },
-				new char[] { 'Ò', 'ò' },
-				new char[] { 'Ù', 'ù' },
+                septetSecond = current.Substring(0, 8 - (7 - (i % 7)));
 
-				new char[] { 'á', 'à' },
-				new char[] { 'í', 'ì' },
-				new char[] { 'ó', 'ò' },
-				new char[] { 'ú', 'ù' },
+                if (i == data.Length - 1 && septetSecond != string.Empty)
+                    output.Add(System.Convert.ToByte(septetSecond, 2));
+            }
 
-			};
-			#endregion
+            foreach (byte @byte in output)
+                result.Append(System.Convert.ToChar(@byte));
 
-			public override int Remaining { get { return Pos == 0 ? 1 : 0; } }
+            return result.ToString();
+        }
 
-			public GSMBestFitEncoderFallbackBuffer(EncoderFallback caller, EncoderFallback lastResortFallback)
-			{
-				LastResortEncoderFallbackBuffer = lastResortFallback.CreateFallbackBuffer();
-			}
+        public override byte[] GetBytes(string text)
+        {
+            return ConvertTo7Bit(text);
+        }
 
-			private void InitData(char ch)
-			{
-				Data = ch;
-				Pos = 0;
-			}
+        public override string GetString(byte[] bytes)
+        {
+            return ConvertFrom7Bit(bytes);
+        }
+    }
 
-			public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
-			{
-				if (Data.HasValue)
-					throw new InvalidOperationException("Recursive fallback buffer call.");
+    internal class GSMBestFitEncoderFallback : EncoderFallback
+    {
+        #region Fallback Buffer implementation
 
-				return LastResortEncoderFallbackBuffer.Fallback(charUnknownHigh, charUnknownLow, index);
-			}
+        public class GSMBestFitEncoderFallbackBuffer : EncoderFallbackBuffer
+        {
+            private EncoderFallbackBuffer LastResortEncoderFallbackBuffer;
+            private char? Data = null;
+            private int Pos = 0;
 
-			public override bool Fallback(char charUnknown, int index)
-			{
-				if (Data.HasValue)
-					throw new InvalidOperationException("Recursive fallback buffer call.");
+            #region Character Table Mappings..
 
-				foreach (var entry in MapTable)
-				{
-					if (entry[0] == charUnknown)
-					{
-						InitData(entry[1]);
-						return true;
-					}
-				}
+            // ÁÉÍÓÚ ÀÈÌÒÙ áéíóú 
+            private static char[][] MapTable = new char[][]
+            {
+                new char[] { 'Á', 'à' },
+                new char[] { 'Í', 'ì' },
+                new char[] { 'Ó', 'ò' },
+                new char[] { 'Ú', 'ù' },
 
-				return LastResortEncoderFallbackBuffer.Fallback(charUnknown, index);
-			}
+                new char[] { 'À', 'à' },
+                new char[] { 'È', 'É' },
+                new char[] { 'Ì', 'ì' },
+                new char[] { 'Ò', 'ò' },
+                new char[] { 'Ù', 'ù' },
 
-			public override char GetNextChar()
-			{
-				if (!Data.HasValue)
-					return LastResortEncoderFallbackBuffer.GetNextChar();
+                new char[] { 'á', 'à' },
+                new char[] { 'í', 'ì' },
+                new char[] { 'ó', 'ò' },
+                new char[] { 'ú', 'ù' },
+            };
 
-				return Pos++ == 0 ? Data.Value : '\0';
-			}
+            #endregion
 
-			public override bool MovePrevious()
-			{
-				if (Data.HasValue)
-					return LastResortEncoderFallbackBuffer.MovePrevious();
+            public override int Remaining => Pos == 0 ? 1 : 0;
 
-				Pos = 0;
+            public GSMBestFitEncoderFallbackBuffer(EncoderFallback caller, EncoderFallback lastResortFallback)
+            {
+                LastResortEncoderFallbackBuffer = lastResortFallback.CreateFallbackBuffer();
+            }
 
-				return true;
-			}
+            private void InitData(char ch)
+            {
+                Data = ch;
+                Pos = 0;
+            }
 
-			public override void Reset()
-			{
-				Data = null;
-				Pos = 0;
-				base.Reset();
-			}
-		}
-		#endregion
+            public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
+            {
+                if (Data.HasValue)
+                    throw new InvalidOperationException("Recursive fallback buffer call.");
 
-		private EncoderFallback lastResortEncoderFallback;
+                return LastResortEncoderFallbackBuffer.Fallback(charUnknownHigh, charUnknownLow, index);
+            }
 
-		public override int MaxCharCount { get { return 1; } }
+            public override bool Fallback(char charUnknown, int index)
+            {
+                if (Data.HasValue)
+                    throw new InvalidOperationException("Recursive fallback buffer call.");
 
-		public GSMBestFitEncoderFallback(EncoderFallback lastResortEncoderFallback)
-		{
-			this.lastResortEncoderFallback = lastResortEncoderFallback;
-		}
+                foreach (var entry in MapTable)
+                {
+                    if (entry[0] == charUnknown)
+                    {
+                        InitData(entry[1]);
+                        return true;
+                    }
+                }
 
-		public override EncoderFallbackBuffer CreateFallbackBuffer()
-		{
-			return new GSMBestFitEncoderFallbackBuffer(this, lastResortEncoderFallback);
-		}
-	}
+                return LastResortEncoderFallbackBuffer.Fallback(charUnknown, index);
+            }
+
+            public override char GetNextChar()
+            {
+                if (!Data.HasValue)
+                    return LastResortEncoderFallbackBuffer.GetNextChar();
+
+                return Pos++ == 0 ? Data.Value : '\0';
+            }
+
+            public override bool MovePrevious()
+            {
+                if (Data.HasValue)
+                    return LastResortEncoderFallbackBuffer.MovePrevious();
+
+                Pos = 0;
+
+                return true;
+            }
+
+            public override void Reset()
+            {
+                Data = null;
+                Pos = 0;
+                base.Reset();
+            }
+        }
+
+        #endregion
+
+        private EncoderFallback lastResortEncoderFallback;
+
+        public override int MaxCharCount => 1;
+
+        public GSMBestFitEncoderFallback(EncoderFallback lastResortEncoderFallback)
+        {
+            this.lastResortEncoderFallback = lastResortEncoderFallback;
+        }
+
+        public override EncoderFallbackBuffer CreateFallbackBuffer()
+        {
+            return new GSMBestFitEncoderFallbackBuffer(this, lastResortEncoderFallback);
+        }
+    }
 }

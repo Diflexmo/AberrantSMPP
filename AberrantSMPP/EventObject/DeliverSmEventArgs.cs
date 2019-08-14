@@ -17,39 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Aberrant.SMPP.Core.Packet.Request;
 
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-
-
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Class that defines a deliver_sm event.  
-	/// </summary>
-	public class DeliverSmEventArgs : SmppEventArgs 
-	{
-		private SmppDeliverSm _response;
+    /// <summary>
+    /// Class that defines a deliver_sm event.  
+    /// </summary>
+    public class DeliverSmEventArgs : SmppEventArgs
+    {
+        /// <summary>
+        /// Allows access to the underlying Pdu.
+        /// </summary>
+        public SmppDeliverSm DeliverSmPdu { get; }
 
-		/// <summary>
-		/// Allows access to the underlying Pdu.
-		/// </summary>
-		public SmppDeliverSm DeliverSmPdu
-		{
-			get
-			{
-				return _response;
-			}
-		}
-		
-		/// <summary>
-		/// Creates a DeliverSmEventArgs.
-		/// </summary>
-		/// <param name="packet">The PDU that was received.</param>
-		internal DeliverSmEventArgs(SmppDeliverSm packet): base(packet)
-		{
-			_response = packet;
-		}
-	}
+        /// <summary>
+        /// Creates a DeliverSmEventArgs.
+        /// </summary>
+        /// <param name="packet">The PDU that was received.</param>
+        internal DeliverSmEventArgs(SmppDeliverSm packet) : base(packet)
+        {
+            DeliverSmPdu = packet;
+        }
+    }
 }

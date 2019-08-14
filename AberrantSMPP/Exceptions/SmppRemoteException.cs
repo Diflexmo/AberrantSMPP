@@ -1,46 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using AberrantSMPP;
-using AberrantSMPP.Packet;
-using AberrantSMPP.Packet.Request;
-using AberrantSMPP.Packet.Response;
+using Aberrant.SMPP.Core.Packet;
+using Aberrant.SMPP.Core.Packet.Request;
+using Aberrant.SMPP.Core.Packet.Response;
 
-namespace AberrantSMPP.Exceptions
+namespace Aberrant.SMPP.Core.Exceptions
 {
-	/// <summary>
-	/// Remote party reported an error to our request.
-	/// </summary>
-	[Serializable]
-	public class SmppRemoteException : Exception
-	{
-		public SmppRequest Request { get; set; }
-		public SmppResponse Response { get; set; }
-		public CommandStatus CommandStatus { get; set; }
+    /// <summary>
+    /// Remote party reported an error to our request.
+    /// </summary>
+    [Serializable]
+    public class SmppRemoteException : Exception
+    {
+        public SmppRequest Request { get; }
+        public SmppResponse Response { get; }
+        public CommandStatus CommandStatus { get; }
 
-		protected SmppRemoteException() { }
-		protected SmppRemoteException(
-		  System.Runtime.Serialization.SerializationInfo info,
-		  System.Runtime.Serialization.StreamingContext context)
-			: base(info, context) { }
+        protected SmppRemoteException()
+        {
+        }
 
-		public SmppRemoteException(string message, CommandStatus status) 
-			: base(message) 
-		{
-			CommandStatus = status;
-		}
+        protected SmppRemoteException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        {
+        }
 
-		public SmppRemoteException(string message, SmppRequest request, SmppResponse response)
-			: base(message)
-		{
-			if (request == null) throw new ArgumentNullException("request");
-			if (response == null) throw new ArgumentNullException("response");
+        public SmppRemoteException(string message, CommandStatus status)
+            : base(message)
+        {
+            CommandStatus = status;
+        }
 
-			Request = request;
-			Response = response;
-			CommandStatus = response.CommandStatus;
-		}
-	}
+        public SmppRemoteException(string message, SmppRequest request, SmppResponse response)
+            : base(message)
+        {
+            Request = request ?? throw new ArgumentNullException("request");
+            Response = response ?? throw new ArgumentNullException("response");
+            CommandStatus = response.CommandStatus;
+        }
+    }
 }

@@ -17,36 +17,27 @@
  * along with RoaminSMPP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 using System;
 
-namespace AberrantSMPP.EventObjects 
+namespace Aberrant.SMPP.Core.EventObject
 {
-	/// <summary>
-	/// Event args class.  Holds the internal exception generated.
-	/// </summary>
-	public class CommonErrorEventArgs : System.EventArgs 
-	{
-		private Exception _exc;
+    /// <summary>
+    /// Event args class.  Holds the internal exception generated.
+    /// </summary>
+    public class CommonErrorEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The thrown exception.
+        /// </summary>
+        public Exception ThrownException { get; }
 
-		/// <summary>
-		/// The thrown exception.
-		/// </summary>
-		public Exception ThrownException 
-		{
-			get 
-			{
-				return _exc;
-			}
-		}
-
-		/// <summary>
-		/// Creates an CommErrorEventArgs.
-		/// </summary>
-		/// <param name="exc">The exception that was generated.</param>
-		public CommonErrorEventArgs(Exception exc)
-		{
-			_exc = exc;
-		}
-	}
+        /// <summary>
+        /// Creates an CommErrorEventArgs.
+        /// </summary>
+        /// <param name="exc">The exception that was generated.</param>
+        public CommonErrorEventArgs(Exception exc)
+        {
+            ThrownException = exc;
+        }
+    }
 }
